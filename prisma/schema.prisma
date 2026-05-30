@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model About {
+  id        Int     @id
+  name      String  @default("")
+  titles    Json    @default("[]")
+  bio       String  @default("")
+  photo_url String?
+
+  @@map("about")
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  tech_stack  Json     @default("[]")
+  url         String?
+  image_url   String?
+  position    Int      @default(0)
+  created_at  DateTime @default(now())
+
+  @@map("projects")
+}
+
+model Experience {
+  id          Int     @id @default(autoincrement())
+  company     String
+  role        String
+  start_date  String
+  end_date    String?
+  description String?
+  position    Int     @default(0)
+
+  @@map("experience")
+}
+
+model Skill {
+  id       Int    @id @default(autoincrement())
+  name     String
+  category String
+  position Int    @default(0)
+
+  @@map("skills")
+}
+
+model Education {
+  id         Int    @id @default(autoincrement())
+  school     String
+  degree     String
+  major      String
+  start_year Int
+  end_year   Int?
+  position   Int    @default(0)
+
+  @@map("education")
+}
+
+model Certificate {
+  id               Int      @id @default(autoincrement())
+  cert_name        String
+  cert_description String?
+  issuer           String
+  date_issued      DateTime @db.Date
+  url              String?
+  position         Int      @default(0)
+
+  @@map("certificates")
+}
+
+model Contact {
+  id       Int    @id @default(autoincrement())
+  platform String @unique
+  url      String
+
+  @@map("contact")
+}

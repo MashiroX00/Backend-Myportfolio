@@ -56,7 +56,6 @@ Single-owner. `POST /auth/login` checks `OWNER_USERNAME` / `OWNER_PASSWORD` from
 | `CRUD /education` | `routes/education.ts` | + `PUT /education/reorder` |
 | `CRUD /certificates` | `routes/certificates.ts` | + `PUT /certificates/reorder` |
 | `GET/POST/PUT/DELETE /contact` | `routes/contact.ts` | No reorder |
-| `GET /server-status` | `routes/server-status.ts` | Public, live system metrics |
 | `POST /auth/login` | `routes/auth.ts` | Returns JWT |
 | `GET /health` | inline in index.ts | Always returns `{status:"ok"}` |
 
@@ -71,6 +70,3 @@ Single-owner. `POST /auth/login` checks `OWNER_USERNAME` / `OWNER_PASSWORD` from
 - `Project.tech_stack` and `About.titles` are `Json` (JSONB in PostgreSQL). Prisma returns these as `JsonValue`; no manual `JSON.stringify` needed on write.
 - **Never run `prisma migrate dev` in production** — use `npm run db:deploy` instead.
 
-### Server status
-
-`GET /server-status` uses `systeminformation` to read live CPU load, memory, disk, and OS info. Picks the disk mounted at `/` or `C:` as the primary disk. Public endpoint — no auth required.

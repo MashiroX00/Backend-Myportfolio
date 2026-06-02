@@ -10,7 +10,6 @@ import skillsRouter from "./routes/skills"
 import educationRouter from "./routes/education"
 import certificatesRouter from "./routes/certificates"
 import contactRouter from "./routes/contact"
-import serverStatusRouter from "./routes/server-status"
 
 const app = express()
 const PORT = process.env.PORT ?? 4000
@@ -30,7 +29,6 @@ app.use("/skills", skillsRouter)
 app.use("/education", educationRouter)
 app.use("/certificates", certificatesRouter)
 app.use("/contact", contactRouter)
-app.use("/server-status", serverStatusRouter)
 
 app.listen(PORT, () => {
   console.log(`Content API running on http://localhost:${PORT}`)

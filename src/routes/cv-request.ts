@@ -44,8 +44,12 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "CV not available" })
     }
 
-    await sendCvEmail(email, about.name, about.cv_url)
+    // Respond before the SMTP round-trip — on the 0.1 vCPU free-tier host the
+    // template render + Gmail handshake can exceed the request timeout.
     sentToday++
+    sendCvEmail(email, about.name, about.cv_url).catch((err) => {
+      console.error(`cv-request: failed to send to ${email}:`, err)
+    })
     res.json({ sent: true })
   } catch {
     res.status(500).json({ error: "Failed to send email" })

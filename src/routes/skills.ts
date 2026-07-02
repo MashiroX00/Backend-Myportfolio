@@ -1,8 +1,23 @@
 import { Router } from "express"
 import prisma from "../db"
 import { requireAuth } from "../middleware/auth"
+import { isNonEmptyString, isInt, isReorderPayload } from "../lib/validate"
 
 const router = Router()
+
+interface SkillInput {
+  name: string
+  category: string
+  position: number
+}
+
+function parseSkill(body: unknown): SkillInput | null {
+  const { name, category, position } = (body ?? {}) as Record<string, unknown>
+  if (!isNonEmptyString(name, 100) || !isNonEmptyString(category, 100) || !isInt(position)) {
+    return null
+  }
+  return { name, category, position }
+}
 
 router.get("/", async (_req, res) => {
   try {
@@ -16,9 +31,10 @@ router.get("/", async (_req, res) => {
 })
 
 router.post("/", requireAuth, async (req, res) => {
-  const { name, category, position } = req.body
+  const data = parseSkill(req.body)
+  if (!data) return res.status(400).json({ error: "Invalid input" })
   try {
-    const skill = await prisma.skill.create({ data: { name, category, position } })
+    const skill = await prisma.skill.create({ data })
     res.status(201).json(skill)
   } catch {
     res.status(500).json({ error: "Database error" })
@@ -26,7 +42,8 @@ router.post("/", requireAuth, async (req, res) => {
 })
 
 router.put("/reorder", requireAuth, async (req, res) => {
-  const items = req.body as { id: number; position: number }[]
+  const items = req.body
+  if (!isReorderPayload(items)) return res.status(400).json({ error: "Invalid input" })
   try {
     await prisma.$transaction(
       items.map(({ id, position }) =>
@@ -40,11 +57,12 @@ router.put("/reorder", requireAuth, async (req, res) => {
 })
 
 router.put("/:id", requireAuth, async (req, res) => {
-  const { name, category, position } = req.body
+  const data = parseSkill(req.body)
+  if (!data) return res.status(400).json({ error: "Invalid input" })
   try {
     const skill = await prisma.skill.update({
       where: { id: Number(req.params.id) },
-      data: { name, category, position },
+      data,
     })
     res.json(skill)
   } catch {

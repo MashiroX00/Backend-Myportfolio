@@ -1,8 +1,15 @@
 import { Router } from "express"
 import prisma from "../db"
 import { requireAuth } from "../middleware/auth"
+import { isNonEmptyString, isHttpUrl } from "../lib/validate"
 
 const router = Router()
+
+function parseContact(body: unknown): { platform: string; url: string } | null {
+  const { platform, url } = (body ?? {}) as { platform?: unknown; url?: unknown }
+  if (!isNonEmptyString(platform, 50) || !isHttpUrl(url)) return null
+  return { platform: platform.trim(), url }
+}
 
 router.get("/", async (_req, res) => {
   try {
@@ -14,9 +21,12 @@ router.get("/", async (_req, res) => {
 })
 
 router.post("/", requireAuth, async (req, res) => {
-  const { platform, url } = req.body as { platform: string; url: string }
+  const data = parseContact(req.body)
+  if (!data) {
+    return res.status(400).json({ error: "platform (max 50 chars) and a valid http(s) url are required" })
+  }
   try {
-    const link = await prisma.contact.create({ data: { platform, url } })
+    const link = await prisma.contact.create({ data })
     res.status(201).json(link)
   } catch {
     res.status(500).json({ error: "Database error" })
@@ -24,11 +34,14 @@ router.post("/", requireAuth, async (req, res) => {
 })
 
 router.put("/:id", requireAuth, async (req, res) => {
-  const { platform, url } = req.body as { platform: string; url: string }
+  const data = parseContact(req.body)
+  if (!data) {
+    return res.status(400).json({ error: "platform (max 50 chars) and a valid http(s) url are required" })
+  }
   try {
     const link = await prisma.contact.update({
       where: { id: Number(req.params.id) },
-      data: { platform, url },
+      data,
     })
     res.json(link)
   } catch {

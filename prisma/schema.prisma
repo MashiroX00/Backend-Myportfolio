@@ -14,6 +14,7 @@ model About {
   titles    Json    @default("[]")
   bio       String  @default("")
   photo_url String?
+  cv_url    String?
 
   @@map("about")
 }
@@ -82,4 +83,14 @@ model Contact {
   url      String
 
   @@map("contact")
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  name       String
+  message    String
+  read       Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@map("messages")
 }

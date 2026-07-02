@@ -8,7 +8,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
     return
   }
   try {
-    jwt.verify(header.slice(7), process.env.JWT_SECRET!)
+    jwt.verify(header.slice(7), process.env.JWT_SECRET!, { algorithms: ["HS256"] })
     next()
   } catch {
     res.status(401).json({ error: "Invalid token" })
